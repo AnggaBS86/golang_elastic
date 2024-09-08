@@ -67,6 +67,7 @@ func worker(id int, jobs <-chan Author, es *elasticsearch.Client, wg *sync.WaitG
 }
 
 func main() {
+	//Load from the .env file
 	err := godotenv.Load("./.env")
 	if err != nil {
 		log.Println(err.Error())
@@ -80,7 +81,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// Elasticsearch API Key (replace with your actual key)
+	// Elasticsearch API Key
 	apiKey := os.Getenv("ELASTICSEARCH_API_KEY")
 
 	// Connect to Elasticsearch with API key
@@ -88,7 +89,7 @@ func main() {
 		Addresses: []string{
 			os.Getenv("ELASTICSEARCH_URL"),
 		},
-		APIKey: apiKey, // Use APIKey field to authenticate
+		APIKey: apiKey,
 	})
 	if err != nil {
 		log.Fatalf("Error creating Elasticsearch client: %s", err)
@@ -142,10 +143,8 @@ func main() {
 		jobs <- authors
 	}
 
-	// Close the jobs channel once all rows are processed
 	close(jobs)
 
-	// Wait for all workers to finish
 	wg.Wait()
 
 	if err := rows.Err(); err != nil {
